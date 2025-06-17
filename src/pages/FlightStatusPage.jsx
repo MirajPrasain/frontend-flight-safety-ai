@@ -610,10 +610,21 @@ const FlightStatusPage = () => {
   // Check backend connection status
   const checkConnection = useCallback(async () => {
     try {
+      console.log('Checking backend connection to:', `${BASE_URL}/`);
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+      
       const response = await fetch(`${BASE_URL}/`, {
         method: 'GET',
-        signal: AbortSignal.timeout(3000)
+        signal: controller.signal,
+        headers: {
+          'Content-Type': 'application/json',
+        }
       });
+      
+      clearTimeout(timeoutId);
+      
+      console.log('Backend response status:', response.status);
       setIsConnected(response.ok);
     } catch (error) {
       console.warn('Backend connection check failed:', error);
